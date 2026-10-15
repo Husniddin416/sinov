@@ -1,7 +1,19 @@
+import os
+import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(title="Cars API")
+
+# React frontend (port 3000, 5173 va h.k.) uchun CORS ruxsati
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
@@ -112,3 +124,9 @@ def delete_car(car_id: int):
                 "car": deleted_car
             }
     raise HTTPException(status_code=404, detail="Bunday id dagi mashina topilmadi")
+
+if __name__ == "__main__":
+    # Render'da $PORT dinamik o'zgaruvchisidan oladi.
+    # Kompyuterda React (3000 yoki 5173) bilan to'qnashmasligi uchun 8000-portda ishga tushadi.
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
